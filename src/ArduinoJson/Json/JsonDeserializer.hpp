@@ -292,7 +292,9 @@ class JsonDeserializer {
       if (err) return err;  // Colon
       if (!eat(':')) return DeserializationError::InvalidInput;
 
-      if (filter[key]) {
+      VariantConstRef memberFilter = filter[key];
+
+      if (memberFilter) {
         VariantData *variant = object.get(adaptString(key));
         if (!variant) {
           // Allocate slot in object
@@ -306,7 +308,7 @@ class JsonDeserializer {
 
         // Parse value
         _nestingLimit--;
-        err = parseVariant(*variant);
+        err = parseVariant(*variant, memberFilter);
         _nestingLimit++;
         if (err) return err;
       } else {
