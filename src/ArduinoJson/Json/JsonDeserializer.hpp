@@ -28,6 +28,7 @@ class JsonDeserializer {
         _stringStorage(stringStorage),
         _nestingLimit(nestingLimit),
         _loaded(false) {}
+
   DeserializationError parse(VariantData &variant) {
     DeserializationError err = parseVariant(variant);
 
@@ -37,6 +38,21 @@ class JsonDeserializer {
     }
 
     return err;
+  }
+
+  DeserializationError parse(VariantData &variant, VariantConstRef filter) {
+    if (filter) {
+      DeserializationError err = parseVariant(variant);
+
+      if (!err && _current != 0 && !variant.isEnclosed()) {
+        // We don't detect trailing characters earlier, so we need to check now
+        err = DeserializationError::InvalidInput;
+      }
+
+      return err;
+    } else {
+      return DeserializationError::Ok;
+    }
   }
 
  private:
@@ -401,6 +417,7 @@ class JsonDeserializer {
   uint8_t _nestingLimit;
   char _current;
   bool _loaded;
+  VariantConstRef _filter;
 };
 
 template <typename TInput>
@@ -415,6 +432,12 @@ DeserializationError deserializeJson(
     JsonDocument &doc, TInput *input,
     NestingLimit nestingLimit = NestingLimit()) {
   return deserialize<JsonDeserializer>(doc, input, nestingLimit);
+}
+
+template <typename TInput>
+DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
+                                     Filter filter) {
+  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter.doc);
 }
 
 template <typename TInput>
