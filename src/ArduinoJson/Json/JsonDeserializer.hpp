@@ -40,8 +40,14 @@ class JsonDeserializer {
     return err;
   }
 
-  DeserializationError parse(VariantData &variant, VariantConstRef filter) {
-    DeserializationError err = parseVariant(variant, filter);
+  template <typename TFilter>
+  DeserializationError parse(VariantData &variant, TFilter filter) {
+    DeserializationError err;
+
+    if (filter)
+      err = parseVariant(variant, filter);
+    else
+      err = skipVariant();
 
     // TODO: restore
     // if (!err && _current != 0 && !variant.isEnclosed()) {
@@ -75,29 +81,11 @@ class JsonDeserializer {
   }
 
   DeserializationError parseVariant(VariantData &variant) {
-    DeserializationError err = skipSpacesAndComments();
-    if (err) return err;
-
-    switch (current()) {
-      case '[':
-        return parseArray(variant.toArray());
-
-      case '{':
-        return parseObject(variant.toObject());
-
-      case '\"':
-      case '\'':
-        return parseStringValue(variant);
-
-      default:
-        return parseNumericValue(variant);
-    }
+    return parseVariant(variant, AlwaysYesVariant());
   }
 
-  DeserializationError parseVariant(VariantData &variant,
-                                    VariantConstRef filter) {
-    if (filter == true) return parseVariant(variant);
-
+  template <typename TFilter>
+  DeserializationError parseVariant(VariantData &variant, TFilter filter) {
     DeserializationError err = skipSpacesAndComments();
     if (err) return err;
 
@@ -106,10 +94,7 @@ class JsonDeserializer {
         return parseArray(variant.toArray(), filter);
 
       case '{':
-        if (filter.is<ObjectRef>())
-          return parseObject(variant.toObject(), filter);
-        else
-          return DeserializationError::Ok;
+        return parseObject(variant.toObject(), filter);
 
       case '\"':
       case '\'':
@@ -175,8 +160,8 @@ class JsonDeserializer {
     }
   }
 
-  DeserializationError parseArray(CollectionData &array,
-                                  VariantConstRef filter) {
+  template <typename TFilter>
+  DeserializationError parseArray(CollectionData &array, TFilter filter) {
     if (_nestingLimit == 0) return DeserializationError::TooDeep;
 
     // Check opening braket
@@ -191,7 +176,7 @@ class JsonDeserializer {
 
     // Read each value
     for (int i = 0;; i++) {
-      VariantConstRef memberFilter = filter[i];
+      TFilter memberFilter = filter[i];
 
       if (memberFilter) {
         // Allocate slot in array
@@ -308,10 +293,8 @@ class JsonDeserializer {
     }
   }
 
-  DeserializationError parseObject(CollectionData &object,
-                                   VariantConstRef filter) {
-    if (!filter.is<ObjectRef>()) return DeserializationError::Ok;
-
+  template <typename TFilter>
+  DeserializationError parseObject(CollectionData &object, TFilter filter) {
     if (_nestingLimit == 0) return DeserializationError::TooDeep;
 
     // Check opening brace
@@ -337,7 +320,7 @@ class JsonDeserializer {
       if (err) return err;  // Colon
       if (!eat(':')) return DeserializationError::InvalidInput;
 
-      VariantConstRef memberFilter = filter[key];
+      TFilter memberFilter = filter[key];
 
       if (memberFilter) {
         VariantData *variant = object.get(adaptString(key));
@@ -700,7 +683,7 @@ DeserializationError deserializeJson(
 template <typename TInput>
 DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
                                      Filter filter) {
-  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter.doc);
+  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter);
 }
 
 template <typename TInput>
