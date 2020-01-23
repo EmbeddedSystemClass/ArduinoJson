@@ -44,7 +44,7 @@ class JsonDeserializer {
   DeserializationError parse(VariantData &variant, TFilter filter) {
     DeserializationError err;
 
-    if (filter)
+    if (filter.allow())
       err = parseVariant(variant, filter);
     else
       err = skipVariant();
@@ -143,7 +143,7 @@ class JsonDeserializer {
     for (int i = 0;; i++) {
       TFilter memberFilter = filter[i];
 
-      if (memberFilter) {
+      if (memberFilter.allow()) {
         // Allocate slot in array
         VariantData *value = array.add(_pool);
         if (!value) return DeserializationError::NoMemory;
@@ -231,7 +231,7 @@ class JsonDeserializer {
 
       TFilter memberFilter = filter[key];
 
-      if (memberFilter) {
+      if (memberFilter.allow()) {
         VariantData *variant = object.get(adaptString(key));
         if (!variant) {
           // Allocate slot in object
