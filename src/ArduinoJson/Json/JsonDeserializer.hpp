@@ -81,7 +81,7 @@ class JsonDeserializer {
   }
 
   DeserializationError parseVariant(VariantData &variant) {
-    return parseVariant(variant, AlwaysYesVariant());
+    return parseVariant(variant, AllowAllFilter());
   }
 
   template <typename TFilter>
@@ -122,41 +122,6 @@ class JsonDeserializer {
 
       default:
         return skipNumericValue();
-    }
-  }
-
-  DeserializationError parseArray(CollectionData &array) {
-    if (_nestingLimit == 0) return DeserializationError::TooDeep;
-
-    // Check opening braket
-    if (!eat('[')) return DeserializationError::InvalidInput;
-
-    // Skip spaces
-    DeserializationError err = skipSpacesAndComments();
-    if (err) return err;
-
-    // Empty array?
-    if (eat(']')) return DeserializationError::Ok;
-
-    // Read each value
-    for (;;) {
-      // Allocate slot in array
-      VariantData *value = array.add(_pool);
-      if (!value) return DeserializationError::NoMemory;
-
-      // 1 - Parse value
-      _nestingLimit--;
-      err = parseVariant(*value);
-      _nestingLimit++;
-      if (err) return err;
-
-      // 2 - Skip spaces
-      err = skipSpacesAndComments();
-      if (err) return err;
-
-      // 3 - More values?
-      if (eat(']')) return DeserializationError::Ok;
-      if (!eat(',')) return DeserializationError::InvalidInput;
     }
   }
 
