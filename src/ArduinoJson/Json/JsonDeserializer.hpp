@@ -30,30 +30,23 @@ class JsonDeserializer {
         _loaded(false) {}
 
   DeserializationError parse(VariantData &variant) {
-    DeserializationError err = parseVariant(variant);
-
-    if (!err && _current != 0 && !variant.isEnclosed()) {
-      // We don't detect trailing characters earlier, so we need to check now
-      err = DeserializationError::InvalidInput;
-    }
-
-    return err;
+    return parse(variant, AllowAllFilter());
   }
 
   template <typename TFilter>
   DeserializationError parse(VariantData &variant, TFilter filter) {
     DeserializationError err;
 
-    if (filter.allow())
+    if (filter.allow()) {
       err = parseVariant(variant, filter);
-    else
-      err = skipVariant();
 
-    // TODO: restore
-    // if (!err && _current != 0 && !variant.isEnclosed()) {
-    //   // We don't detect trailing characters earlier, so we need to check now
-    //   err = DeserializationError::InvalidInput;
-    // }
+      if (!err && _current != 0 && !variant.isEnclosed()) {
+        // We don't detect trailing characters earlier, so we need to check now
+        err = DeserializationError::InvalidInput;
+      }
+    } else {
+      err = skipVariant();
+    }
 
     return err;
   }
@@ -140,7 +133,7 @@ class JsonDeserializer {
     if (eat(']')) return DeserializationError::Ok;
 
     // Read each value
-    for (int i = 0;; i++) {
+    for (size_t i = 0;; i++) {
       TFilter memberFilter = filter[i];
 
       if (memberFilter.allow()) {
