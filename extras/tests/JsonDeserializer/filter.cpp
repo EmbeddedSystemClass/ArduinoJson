@@ -94,6 +94,11 @@ TEST_CASE("Filtering") {
                              "{\"answer\":true}", "{\"answer\":42}");
     }
 
+    SECTION("can skip an array with spaces in it") {
+      checkJsonFilterSuccess("{\"an_array\": [ 1 , 2 , 3 ] ,answer:42}",
+                             "{\"answer\":true}", "{\"answer\":42}");
+    }
+
     SECTION("can skip an empty object") {
       checkJsonFilterSuccess("{\"an_empty_object\":{},answer:42}",
                              "{\"answer\":true}", "{\"answer\":42}");
@@ -157,6 +162,16 @@ TEST_CASE("Filtering") {
     checkJsonFilterError("'A\\'BC", "false",
                          DeserializationError::IncompleteInput);
     checkJsonFilterError("\"A\\\"BC", "false",
+                         DeserializationError::IncompleteInput);
+  }
+
+  SECTION("Skip empty array") {
+    checkJsonFilterSuccess("[]", "false", "null");
+    checkJsonFilterSuccess(" [ ] ", "false", "null");
+  }
+
+  SECTION("Bublle up errors in skipped array") {
+    checkJsonFilterError("[1,'2,3]", "false",
                          DeserializationError::IncompleteInput);
   }
 }

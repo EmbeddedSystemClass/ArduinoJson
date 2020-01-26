@@ -181,13 +181,13 @@ class JsonDeserializer {
     for (;;) {
       // 1 - Parse value
       // nestingLimit--; // TODO
-      /*err = */ skipVariant();
+      DeserializationError err = skipVariant();
       // _nestingLimit++; // TODO
-      // if (err) return err; // TODO
+      if (err) return err;
 
       // 2 - Skip spaces
-      // err = skipSpacesAndComments();
-      // if (err) return err;
+      err = skipSpacesAndComments();
+      if (err) return err;
 
       // 3 - More values?
       if (eat(']')) return DeserializationError::Ok;
