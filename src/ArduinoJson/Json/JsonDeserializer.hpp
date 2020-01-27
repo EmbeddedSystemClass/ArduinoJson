@@ -169,14 +169,6 @@ class JsonDeserializer {
     // Check opening braket
     if (!eat('[')) return DeserializationError::InvalidInput;
 
-    // TODO
-    // Skip spaces
-    // DeserializationError err = skipSpacesAndComments();
-    // if (err) return err;
-
-    // Empty array?
-    // if (eat(']')) return DeserializationError::Ok;  TODO: probably not needed
-
     // Read each value
     for (;;) {
       // 1 - Parse value
