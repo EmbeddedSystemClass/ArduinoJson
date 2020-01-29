@@ -138,12 +138,14 @@ TEST_CASE("Filtering") {
   }
 
   SECTION("Array: bubble up error in skipped value") {
-    checkJsonFilterError("[!,2,3]", "[false,true]",
-                         DeserializationError::InvalidInput);
     checkJsonFilterError("[',2,3]", "[false,true]",
                          DeserializationError::IncompleteInput);
     checkJsonFilterError("[\",2,3]", "[false,true]",
                          DeserializationError::IncompleteInput);
+  }
+
+  SECTION("Array: ignore error in skipped value") {
+    checkJsonFilterSuccess("[!,2,\\]", "[false,true]", "[2]");
   }
 
   SECTION("Detect incomplete double quoted string") {
@@ -170,8 +172,28 @@ TEST_CASE("Filtering") {
     checkJsonFilterSuccess(" [ ] ", "false", "null");
   }
 
-  SECTION("Bublle up errors in skipped array") {
+  SECTION("Bubble up errors in skipped array") {
     checkJsonFilterError("[1,'2,3]", "false",
                          DeserializationError::IncompleteInput);
+  }
+
+  SECTION("Bubble up value error in skipped object") {
+    checkJsonFilterError("{'hello':'worl}", "false",
+                         DeserializationError::IncompleteInput);
+  }
+
+  SECTION("Bubble up colon error in skipped object") {
+    checkJsonFilterError("{'hello','world'}", "false",
+                         DeserializationError::InvalidInput);
+  }
+
+  SECTION("Bubble up key errors in skipped object") {
+    checkJsonFilterError("{'hello:1}", "false",
+                         DeserializationError::IncompleteInput);
+  }
+
+  SECTION("Ignores invalid value in skipped object") {
+    checkJsonFilterSuccess("{'hello':!}", "false", "null");
+    checkJsonFilterSuccess("{'hello':\\}", "false", "null");
   }
 }

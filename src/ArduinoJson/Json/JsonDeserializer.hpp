@@ -271,8 +271,8 @@ class JsonDeserializer {
     // Read each key value pair
     for (;;) {
       // Skip key
-      /*err = */ skipVariant();
-      // if (err) return err; TODO
+      err = skipVariant();
+      if (err) return err;
 
       // Skip spaces
       err = skipSpacesAndComments();
@@ -283,7 +283,7 @@ class JsonDeserializer {
       // _nestingLimit--; TODO
       err = skipVariant();
       // _nestingLimit++;
-      // if (err) return err; TODO
+      if (err) return err;
 
       // Skip spaces
       err = skipSpacesAndComments();
@@ -446,7 +446,7 @@ class JsonDeserializer {
 
   DeserializationError skipNumericValue() {
     char c = current();
-    while (canBeInNonQuotedString(c)) {
+    while (c != '}' && c != ',' && c != ']' && c != ':') {
       move();
       c = current();
     }
