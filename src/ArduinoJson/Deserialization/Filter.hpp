@@ -16,6 +16,14 @@ class Filter {
     return _variant;
   }
 
+  bool allowArray() const {
+    return _variant == true || _variant.is<ArrayRef>();
+  }
+
+  bool allowObject() const {
+    return _variant == true || _variant.is<ObjectRef>();
+  }
+
   template <typename TKey>
   Filter operator[](const TKey& key) const {
     if (_variant == true)  // "true" means "allow recursively"
@@ -30,6 +38,14 @@ class Filter {
 
 struct AllowAllFilter {
   bool allow() const {
+    return true;
+  }
+
+  bool allowArray() const {
+    return true;
+  }
+
+  bool allowObject() const {
     return true;
   }
 

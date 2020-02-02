@@ -40,6 +40,20 @@ TEST_CASE("Filtering") {
       "{}"
     }, 
     {
+      // Input in an objects but filter wants an array
+      "{\"hello\":\"world\"}",
+      "[]",
+      DeserializationError::Ok,
+      "null"
+    }, 
+    {
+      // Input is an array, but filter wants an object
+      "[\"hello\",\"world\"]",
+      "{}",
+      DeserializationError::Ok,
+      "null"
+    },
+    {
       // skip an integer
       "{\"an_integer\":666,answer:42}",
       "{\"answer\":true}",

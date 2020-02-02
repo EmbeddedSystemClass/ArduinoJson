@@ -84,10 +84,16 @@ class JsonDeserializer {
 
     switch (current()) {
       case '[':
-        return parseArray(variant.toArray(), filter);
+        if (filter.allowArray())
+          return parseArray(variant.toArray(), filter);
+        else
+          return skipArray();
 
       case '{':
-        return parseObject(variant.toObject(), filter);
+        if (filter.allowObject())
+          return parseObject(variant.toObject(), filter);
+        else
+          return skipObject();
 
       case '\"':
       case '\'':
