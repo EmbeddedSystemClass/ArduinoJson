@@ -561,6 +561,7 @@ class JsonDeserializer {
   VariantConstRef _filter;
 };
 
+// deserializeJson(JsonDocument&, const std::string&, Filter)
 template <typename TInput>
 DeserializationError deserializeJson(
     JsonDocument &doc, const TInput &input,
@@ -568,6 +569,14 @@ DeserializationError deserializeJson(
   return deserialize<JsonDeserializer>(doc, input, nestingLimit);
 }
 
+// deserializeJson(JsonDocument&, const std::string&, Filter)
+template <typename TInput>
+DeserializationError deserializeJson(JsonDocument &doc, const TInput &input,
+                                     Filter filter) {
+  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter);
+}
+
+// deserializeJson(JsonDocument&, char*, Filter)
 template <typename TInput>
 DeserializationError deserializeJson(
     JsonDocument &doc, TInput *input,
@@ -575,6 +584,7 @@ DeserializationError deserializeJson(
   return deserialize<JsonDeserializer>(doc, input, nestingLimit);
 }
 
+// deserializeJson(JsonDocument&, const char*, Filter)
 template <typename TInput>
 DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
                                      Filter filter) {
@@ -588,10 +598,28 @@ DeserializationError deserializeJson(
   return deserialize<JsonDeserializer>(doc, input, inputSize, nestingLimit);
 }
 
+// deserializeJson(JsonDocument&, const char*, size_t, Filter)
+template <typename TInput>
+DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
+                                     size_t inputSize, Filter filter) {
+  return deserialize<JsonDeserializer>(doc, input, inputSize, NestingLimit(),
+                                       filter);
+}
+
+// deserializeJson(JsonDocument&, const std::istream&, Filter)
 template <typename TInput>
 DeserializationError deserializeJson(
     JsonDocument &doc, TInput &input,
     NestingLimit nestingLimit = NestingLimit()) {
   return deserialize<JsonDeserializer>(doc, input, nestingLimit);
 }
+
+// deserializeJson(JsonDocument&, const std::istream&, Filter)
+template <typename TInput>
+DeserializationError deserializeJson(
+    JsonDocument &doc, TInput &input, Filter filter,
+    NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<JsonDeserializer>(doc, input, nestingLimit, filter);
+}
+
 }  // namespace ARDUINOJSON_NAMESPACE

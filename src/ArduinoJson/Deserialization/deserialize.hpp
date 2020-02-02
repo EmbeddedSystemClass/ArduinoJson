@@ -36,7 +36,25 @@ deserialize(JsonDocument &doc, const TString &input,
              makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
       .parse(doc.data());
 }
-//
+
+// TODO: deduplicate
+// deserialize(JsonDocument&, const std::string&, Filter);
+// deserialize(JsonDocument&, const String&, Filter);
+// deserialize(JsonDocument&, char*, Filter);
+// deserialize(JsonDocument&, const char*, Filter);
+// deserialize(JsonDocument&, const __FlashStringHelper*, Filter);
+template <template <typename, typename> class TDeserializer, typename TString>
+typename enable_if<!is_array<TString>::value, DeserializationError>::type
+deserialize(JsonDocument &doc, const TString &input, NestingLimit nestingLimit,
+            Filter filter) {
+  Reader<TString> reader(input);
+  doc.clear();
+  return makeDeserializer<TDeserializer>(
+             doc.memoryPool(), reader,
+             makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
+      .parse(doc.data(), filter);
+}
+
 // deserialize(JsonDocument&, char*, size_t);
 // deserialize(JsonDocument&, const char*, size_t);
 // deserialize(JsonDocument&, const __FlashStringHelper*, size_t);
@@ -51,6 +69,22 @@ DeserializationError deserialize(JsonDocument &doc, TChar *input,
       .parse(doc.data());
 }
 //
+// TODO: deduplicate
+// deserialize(JsonDocument&, char*, size_t, Filter);
+// deserialize(JsonDocument&, const char*, size_t, Filter);
+// deserialize(JsonDocument&, const __FlashStringHelper*, size_t, Filter);
+template <template <typename, typename> class TDeserializer, typename TChar>
+DeserializationError deserialize(JsonDocument &doc, TChar *input,
+                                 size_t inputSize, NestingLimit nestingLimit,
+                                 Filter filter) {
+  BoundedReader<TChar *> reader(input, inputSize);
+  doc.clear();
+  return makeDeserializer<TDeserializer>(
+             doc.memoryPool(), reader,
+             makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
+      .parse(doc.data(), filter);
+}
+
 // deserialize(JsonDocument&, std::istream&);
 // deserialize(JsonDocument&, Stream&);
 template <template <typename, typename> class TDeserializer, typename TStream>
@@ -64,16 +98,18 @@ DeserializationError deserialize(JsonDocument &doc, TStream &input,
       .parse(doc.data());
 }
 
-// TODO: cleanup
-template <template <typename, typename> class TDeserializer, typename TString>
-typename enable_if<!is_array<TString>::value, DeserializationError>::type
-deserialize(JsonDocument &doc, const TString &input, NestingLimit nestingLimit,
-            Filter filter) {
-  Reader<TString> reader(input);
+// TODO: deduplicate
+// deserialize(JsonDocument&, std::istream&);
+// deserialize(JsonDocument&, Stream&);
+template <template <typename, typename> class TDeserializer, typename TStream>
+DeserializationError deserialize(JsonDocument &doc, TStream &input,
+                                 NestingLimit nestingLimit, Filter filter) {
+  Reader<TStream> reader(input);
   doc.clear();
   return makeDeserializer<TDeserializer>(
              doc.memoryPool(), reader,
              makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
       .parse(doc.data(), filter);
 }
+
 }  // namespace ARDUINOJSON_NAMESPACE

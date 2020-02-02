@@ -5,6 +5,9 @@
 #include <ArduinoJson.h>
 #include <catch.hpp>
 
+#include <sstream>
+#include <string>
+
 TEST_CASE("Filtering") {
   struct TestCase {
     std::string input;
@@ -310,5 +313,28 @@ TEST_CASE("Filtering") {
                           DeserializationOption::Filter(filter)) == tc.error);
 
     CHECK(doc.as<std::string>() == tc.output);
+  }
+}
+
+TEST_CASE("Overloads") {
+  StaticJsonDocument<256> doc;
+  StaticJsonDocument<256> filter;
+
+  SECTION("deserializeJson(JsonDocument&, const char*, Filter") {
+    deserializeJson(doc, "{}", DeserializationOption::Filter(filter));
+  }
+
+  SECTION("deserializeJson(JsonDocument&, const char*, size_t, Filter") {
+    deserializeJson(doc, "{}", 2, DeserializationOption::Filter(filter));
+  }
+
+  SECTION("deserializeJson(JsonDocument&, const std::string&, Filter") {
+    deserializeJson(doc, std::string("{}"),
+                    DeserializationOption::Filter(filter));
+  }
+
+  SECTION("deserializeJson(JsonDocument&, std::istream&, Filter") {
+    std::stringstream s("{}");
+    deserializeJson(doc, s, DeserializationOption::Filter(filter));
   }
 }
