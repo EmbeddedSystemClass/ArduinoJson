@@ -40,7 +40,7 @@ TEST_CASE("Filtering") {
       "{}"
     }, 
     {
-      // Input in an objects but filter wants an array
+      // Input in an object, but filter wants an array
       "{\"hello\":\"world\"}",
       "[]",
       DeserializationError::Ok,
@@ -49,6 +49,20 @@ TEST_CASE("Filtering") {
     {
       // Input is an array, but filter wants an object
       "[\"hello\",\"world\"]",
+      "{}",
+      DeserializationError::Ok,
+      "null"
+    },
+    {
+      // Input is a bool, but filter wants an object
+      "true",
+      "{}",
+      DeserializationError::Ok,
+      "null"
+    },
+    {
+      // Input is a string, but filter wants an object
+      "\"hello\"",
       "{}",
       DeserializationError::Ok,
       "null"

@@ -35,17 +35,11 @@ class JsonDeserializer {
 
   template <typename TFilter>
   DeserializationError parse(VariantData &variant, TFilter filter) {
-    DeserializationError err;
+    DeserializationError err = parseVariant(variant, filter);
 
-    if (filter.allow()) {
-      err = parseVariant(variant, filter);
-
-      if (!err && _current != 0 && !variant.isEnclosed()) {
-        // We don't detect trailing characters earlier, so we need to check now
-        err = DeserializationError::InvalidInput;
-      }
-    } else {
-      err = skipVariant();
+    if (!err && _current != 0 && !variant.isEnclosed()) {
+      // We don't detect trailing characters earlier, so we need to check now
+      err = DeserializationError::InvalidInput;
     }
 
     return err;
@@ -97,10 +91,16 @@ class JsonDeserializer {
 
       case '\"':
       case '\'':
-        return parseStringValue(variant);
+        if (filter.allowValue())
+          return parseStringValue(variant);
+        else
+          return skipString();
 
       default:
-        return parseNumericValue(variant);
+        if (filter.allowValue())
+          return parseNumericValue(variant);
+        else
+          return skipNumericValue();
     }
   }
 
