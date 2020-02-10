@@ -10,10 +10,11 @@
 
 TEST_CASE("Filtering") {
   struct TestCase {
-    std::string input;
-    std::string filter;
+    const char* input;
+    const char* filter;
     DeserializationError error;
-    std::string output;
+    const char* output;
+    size_t memoryUsage;
   };
 
   // clang-format off
@@ -22,279 +23,320 @@ TEST_CASE("Filtering") {
       "{\"hello\":\"world\"}",   // 1. input
       "null",                    // 2. filter
       DeserializationError::Ok,  // 3. error
-      "null"                     // 4. output
+      "null",                    // 4. output
+      0                          // 5. memoryUsage
     },
     {
       "{\"hello\":\"world\"}",
       "false",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
-      "{\"hello\":\"world\"}",
+      "{\"abcdefg\":\"hijklmn\"}",
       "true",
       DeserializationError::Ok,
-      "{\"hello\":\"world\"}"
+      "{\"abcdefg\":\"hijklmn\"}",
+      JSON_OBJECT_SIZE(1) + 16
     },
     {
       "{\"hello\":\"world\"}",
       "{}",
       DeserializationError::Ok,
-      "{}"
-    }, 
+      "{}",
+      JSON_OBJECT_SIZE(0)
+    },
     {
       // Input in an object, but filter wants an array
       "{\"hello\":\"world\"}",
       "[]",
       DeserializationError::Ok,
-      "null"
-    }, 
+      "null",
+      0
+    },
     {
       // Input is an array, but filter wants an object
       "[\"hello\",\"world\"]",
       "{}",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // Input is a bool, but filter wants an object
       "true",
       "{}",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // Input is a string, but filter wants an object
       "\"hello\"",
       "{}",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // skip an integer
-      "{\"an_integer\":666,answer:42}",
-      "{\"answer\":true}",
+      "{\"an_integer\":666,example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
-    }, 
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
+    },
     {
       // skip a float
-      "{\"a_float\":12.34e-6,answer:42}",
-      "{\"answer\":true}",
+      "{\"a_float\":12.34e-6,example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip a boolean
-      "{\"a_bool\":false,answer:42}",
-      "{\"answer\":true}",
+      "{\"a_bool\":false,example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip a double-quoted string
-      "{\"a_double_quoted_string\":\"hello\",answer:42}",
-      "{\"answer\":true}",
+      "{\"a_double_quoted_string\":\"hello\",example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip a single-quoted string
-      "{\"a_single_quoted_string\":'hello',answer:42}",
-      "{\"answer\":true}",
+      "{\"a_single_quoted_string\":'hello',example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an empty array
-      "{\"an_empty_array\":[],answer:42}",
-      "{\"answer\":true}",
+      "{\"an_empty_array\":[],example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an empty array with spaces in it
-      "{\"an_empty_array\":[\t],answer:42}",
-      "{\"answer\":true}",
+      "{\"an_empty_array\":[\t],example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an array
-      "{\"an_array\":[1,2,3],answer:42}",
-      "{\"answer\":true}",
+      "{\"an_array\":[1,2,3],example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an array with spaces in it
-      "{\"an_array\": [ 1 , 2 , 3 ] ,answer:42}",
-      "{\"answer\":true}",
+      "{\"an_array\": [ 1 , 2 , 3 ] ,example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an empty object
-      "{\"an_empty_object\":{},answer:42}",
-      "{\"answer\":true}",
+      "{\"an_empty_object\":{},example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an empty object with spaces in it
-      "{\"an_empty_object\":{    },answer:42}",
-      "{\"answer\":true}",
+      "{\"an_empty_object\":{    },example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // can skip an object
-      "{\"an_object\":{a:1,'b':2,\"c\":3},answer:42}",
-      "{\"answer\":true}",
+      "{\"an_object\":{a:1,'b':2,\"c\":3},example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
       // skip an object with spaces in it
-      "{\"an_object\" : { a : 1 , 'b' : 2 , \"c\" : 3 } ,answer:42}",
-      "{\"answer\":true}",
+      "{\"an_object\" : { a : 1 , 'b' : 2 , \"c\" : 3 } ,example:42}",
+      "{\"example\":true}",
       DeserializationError::Ok,
-      "{\"answer\":42}"
+      "{\"example\":42}",
+      JSON_OBJECT_SIZE(1) + 8
     },
     {
-      "{\"an_integer\": 0,\"answer\":{\"type\":\"int\",\"value\":42}}",
-      "{\"answer\":{\"value\":true}}",
+      "{\"an_integer\": 0,\"example\":{\"type\":\"int\",\"outcome\":42}}",
+      "{\"example\":{\"outcome\":true}}",
       DeserializationError::Ok,
-      "{\"answer\":{\"value\":42}}"
+      "{\"example\":{\"outcome\":42}}",
+      2 * JSON_OBJECT_SIZE(1) + 16
     },
     {
       "[1,2,3]",
       "[false,true]",
       DeserializationError::Ok,
-      "[2]"
+      "[2]",
+      JSON_ARRAY_SIZE(1)
     },
     {
       "[1,[2.1,2.2,2.3],3]",
       "[false,[false, true]]",
       DeserializationError::Ok,
-      "[[2.2]]"
+      "[[2.2]]",
+      2*JSON_ARRAY_SIZE(1)
     },
     {
       "[',2,3]",
       "[false,true]",
       DeserializationError::IncompleteInput,
-      "[]"
+      "[]",
+      JSON_ARRAY_SIZE(0)
     },
     {
       "[\",2,3]",
       "[false,true]",
       DeserializationError::IncompleteInput,
-      "[]"      
+      "[]",
+      JSON_ARRAY_SIZE(0)
     },
     {
       // ignore errors in skipped value
       "[!,2,\\]",
       "[false,true]",
       DeserializationError::Ok,
-      "[2]"
+      "[2]",
+      JSON_ARRAY_SIZE(1)
     },
     {
       // detect incomplete string event if it's skipped
       "\"ABC",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // detect incomplete string event if it's skipped
       "'ABC",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // handle escaped quotes
       "'A\\'BC'",
       "false",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // handle escaped quotes
       "\"A\\\"BC\"",
       "false",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // detect incomplete string in presence of escaped quotes
       "'A\\'BC",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // detect incomplete string in presence of escaped quotes
       "\"A\\\"BC",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // skip empty array
       "[]",
       "false",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // skip empty array with spaces
       " [ ] ",
       "false",
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // bubble up element error even if array is skipped 
       "[1,'2,3]",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // bubble up member error even if object is skipped 
       "{'hello':'worl}",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // bubble up colon error even if object is skipped 
       "{'hello','world'}",
       "false",
       DeserializationError::InvalidInput,
-      "null"
+      "null",
+      0
     },
     {
       // bubble up key error even if object is skipped 
       "{'hello:1}",
       "false",
       DeserializationError::IncompleteInput,
-      "null"
+      "null",
+      0
     },
     {
       // ignore invalid value in skipped object
       "{'hello':!}",
       "false", 
       DeserializationError::Ok,
-      "null"
+      "null",
+      0
     },
     {
       // ignore invalid value in skipped object
       "{'hello':\\}",
       "false", 
       DeserializationError::Ok,
-      "null"
+      "null", 
+      0
     }
   };  // clang-format on
 
@@ -309,10 +351,11 @@ TEST_CASE("Filtering") {
     REQUIRE(deserializeJson(filter, tc.filter) == DeserializationError::Ok);
 
     CAPTURE(tc.input);
-    CHECK(deserializeJson(doc, tc.input.c_str(),
+    CHECK(deserializeJson(doc, tc.input,
                           DeserializationOption::Filter(filter)) == tc.error);
 
     CHECK(doc.as<std::string>() == tc.output);
+    CHECK(doc.memoryUsage() == tc.memoryUsage);
   }
 }
 
@@ -375,6 +418,34 @@ TEST_CASE("Overloads") {
     char vla[i];
     strcpy(vla, "{}");
     deserializeJson(doc, vla, Filter(filter), NestingLimit(5));
+  }
+#endif
+
+  // deserializeJson(..., NestingLimit, Filter)
+
+  SECTION("const char*, NestingLimit, Filter") {
+    deserializeJson(doc, "{}", NestingLimit(5), Filter(filter));
+  }
+
+  SECTION("const char*, size_t, NestingLimit, Filter") {
+    deserializeJson(doc, "{}", 2, NestingLimit(5), Filter(filter));
+  }
+
+  SECTION("const std::string&, NestingLimit, Filter") {
+    deserializeJson(doc, std::string("{}"), NestingLimit(5), Filter(filter));
+  }
+
+  SECTION("std::istream&, NestingLimit, Filter") {
+    std::stringstream s("{}");
+    deserializeJson(doc, s, NestingLimit(5), Filter(filter));
+  }
+
+#ifdef HAS_VARIABLE_LENGTH_ARRAY
+  SECTION("char[n], NestingLimit, Filter") {
+    int i = 4;
+    char vla[i];
+    strcpy(vla, "{}");
+    deserializeJson(doc, vla, NestingLimit(5), Filter(filter));
   }
 #endif
 }

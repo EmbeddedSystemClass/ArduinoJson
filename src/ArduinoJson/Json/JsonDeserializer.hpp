@@ -236,6 +236,7 @@ class JsonDeserializer {
         _nestingLimit++;
         if (err) return err;
       } else {
+        _stringStorage.reclaim(key);
         // _nestingLimit--; TODO
         err = skipVariant();
         // _nestingLimit++; TODO
