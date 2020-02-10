@@ -571,9 +571,10 @@ DeserializationError deserializeJson(
 
 // deserializeJson(JsonDocument&, const std::string&, Filter)
 template <typename TInput>
-DeserializationError deserializeJson(JsonDocument &doc, const TInput &input,
-                                     Filter filter) {
-  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter);
+DeserializationError deserializeJson(
+    JsonDocument &doc, const TInput &input, Filter filter,
+    NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<JsonDeserializer>(doc, input, nestingLimit, filter);
 }
 
 // deserializeJson(JsonDocument&, char*, Filter)
