@@ -559,54 +559,69 @@ class JsonDeserializer {
 };
 
 // deserializeJson(JsonDocument&, const std::string&, ...)
-template <typename T1>
-DeserializationError deserializeJson(JsonDocument &doc, const T1 &a1) {
-  return deserialize<JsonDeserializer>(doc, a1);
+template <typename TInput>
+DeserializationError deserializeJson(JsonDocument &doc, const TInput &input) {
+  return deserialize<JsonDeserializer>(doc, input);
 }
-template <typename T1, typename T2>
-DeserializationError deserializeJson(JsonDocument &doc, const T1 &a1,
-                                     const T2 &a2) {
-  return deserialize<JsonDeserializer>(doc, a1, a2);
+template <typename TInput, typename TOpt1>
+DeserializationError deserializeJson(JsonDocument &doc, const TInput &input,
+                                     const TOpt1 &opt1) {
+  return deserialize<JsonDeserializer>(doc, input, opt1);
 }
-template <typename T1, typename T2, typename T3>
-DeserializationError deserializeJson(JsonDocument &doc, const T1 &a1,
-                                     const T2 &a2, const T3 &a3) {
-  return deserialize<JsonDeserializer>(doc, a1, a2, a3);
+template <typename TInput, typename TOpt1, typename TOpt2>
+DeserializationError deserializeJson(JsonDocument &doc, const TInput &input,
+                                     const TOpt1 &opt1, const TOpt2 &opt2) {
+  return deserialize<JsonDeserializer>(doc, input, opt1, opt2);
 }
 
 // deserializeJson(JsonDocument&, const std::istream&, ...)
-template <typename T1>
-DeserializationError deserializeJson(JsonDocument &doc, T1 &a1) {
-  return deserialize<JsonDeserializer>(doc, a1);
+template <typename TInput>
+DeserializationError deserializeJson(JsonDocument &doc, TInput &input) {
+  return deserialize<JsonDeserializer>(doc, input);
 }
-template <typename T1, typename T2>
-DeserializationError deserializeJson(JsonDocument &doc, T1 &a1, const T2 &a2) {
-  return deserialize<JsonDeserializer>(doc, a1, a2);
+template <typename TInput, typename TOpt1>
+DeserializationError deserializeJson(JsonDocument &doc, TInput &input,
+                                     const TOpt1 &opt1) {
+  return deserialize<JsonDeserializer>(doc, input, opt1);
 }
-template <typename T1, typename T2, typename T3>
-DeserializationError deserializeJson(JsonDocument &doc, T1 &a1, const T2 &a2,
-                                     const T3 &a3) {
-  return deserialize<JsonDeserializer>(doc, a1, a2, a3);
+template <typename TInput, typename TOpt1, typename TOpt2>
+DeserializationError deserializeJson(JsonDocument &doc, TInput &input,
+                                     const TOpt1 &opt1, const TOpt2 &opt2) {
+  return deserialize<JsonDeserializer>(doc, input, opt1, opt2);
 }
 
 // deserializeJson(JsonDocument&, char*, ...)
-template <typename T1>
-DeserializationError deserializeJson(JsonDocument &doc, T1 *a1) {
-  return deserialize<JsonDeserializer>(doc, a1);
+template <typename TChar>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input) {
+  return deserialize<JsonDeserializer>(doc, input);
 }
-template <typename T1, typename T2>
-DeserializationError deserializeJson(JsonDocument &doc, T1 *a1, const T2 &a2) {
-  return deserialize<JsonDeserializer>(doc, a1, a2);
+template <typename TChar, typename TOpt1>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input,
+                                     const TOpt1 &opt1) {
+  return deserialize<JsonDeserializer>(doc, input, opt1);
 }
-template <typename T1, typename T2, typename T3>
-DeserializationError deserializeJson(JsonDocument &doc, T1 *a1, const T2 &a2,
-                                     const T3 &a3) {
-  return deserialize<JsonDeserializer>(doc, a1, a2, a3);
+template <typename TChar, typename TOpt1, typename TOpt2>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input,
+                                     const TOpt1 &opt1, const TOpt2 &opt2) {
+  return deserialize<JsonDeserializer>(doc, input, opt1, opt2);
 }
-template <typename T1, typename T2, typename T3, typename T4>
-DeserializationError deserializeJson(JsonDocument &doc, T1 *a1, const T2 &a2,
-                                     const T3 &a3, const T4 &a4) {
-  return deserialize<JsonDeserializer>(doc, a1, a2, a3, a4);
+
+// deserializeJson(JsonDocument&, char*, size_t, ...)
+template <typename TChar>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input,
+                                     size_t inputSize) {
+  return deserialize<JsonDeserializer>(doc, input, inputSize);
+}
+template <typename TChar, typename TOpt1>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input,
+                                     size_t inputSize, const TOpt1 &opt1) {
+  return deserialize<JsonDeserializer>(doc, input, inputSize, opt1);
+}
+template <typename TChar, typename TOpt1, typename TOpt2>
+DeserializationError deserializeJson(JsonDocument &doc, TChar *input,
+                                     size_t inputSize, const TOpt1 &opt1,
+                                     const TOpt2 &opt2) {
+  return deserialize<JsonDeserializer>(doc, input, inputSize, opt1, opt2);
 }
 
 }  // namespace ARDUINOJSON_NAMESPACE
