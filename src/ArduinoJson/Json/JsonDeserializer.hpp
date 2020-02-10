@@ -586,9 +586,10 @@ DeserializationError deserializeJson(
 
 // deserializeJson(JsonDocument&, const char*, Filter)
 template <typename TInput>
-DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
-                                     Filter filter) {
-  return deserialize<JsonDeserializer>(doc, input, NestingLimit(), filter);
+DeserializationError deserializeJson(
+    JsonDocument &doc, TInput *input, Filter filter,
+    NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<JsonDeserializer>(doc, input, nestingLimit, filter);
 }
 
 template <typename TInput>
@@ -600,9 +601,10 @@ DeserializationError deserializeJson(
 
 // deserializeJson(JsonDocument&, const char*, size_t, Filter)
 template <typename TInput>
-DeserializationError deserializeJson(JsonDocument &doc, TInput *input,
-                                     size_t inputSize, Filter filter) {
-  return deserialize<JsonDeserializer>(doc, input, inputSize, NestingLimit(),
+DeserializationError deserializeJson(
+    JsonDocument &doc, TInput *input, size_t inputSize, Filter filter,
+    NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<JsonDeserializer>(doc, input, inputSize, nestingLimit,
                                        filter);
 }
 

@@ -24,5 +24,7 @@ TEST_CASE("Issue772") {
   serializeMsgPack(doc1, data);
   err = deserializeMsgPack(doc2, data);
 
+  deserializeJson()
+
   REQUIRE(err == DeserializationError::Ok);
 }

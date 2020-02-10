@@ -320,21 +320,41 @@ TEST_CASE("Overloads") {
   StaticJsonDocument<256> doc;
   StaticJsonDocument<256> filter;
 
-  SECTION("deserializeJson(JsonDocument&, const char*, Filter") {
-    deserializeJson(doc, "{}", DeserializationOption::Filter(filter));
+  using namespace DeserializationOption;
+
+  SECTION("deserializeJson(JsonDocument&, const char*, Filter)") {
+    deserializeJson(doc, "{}", Filter(filter));
   }
 
-  SECTION("deserializeJson(JsonDocument&, const char*, size_t, Filter") {
-    deserializeJson(doc, "{}", 2, DeserializationOption::Filter(filter));
+  SECTION("deserializeJson(JsonDocument&, const char*, size_t, Filter)") {
+    deserializeJson(doc, "{}", 2, Filter(filter));
   }
 
-  SECTION("deserializeJson(JsonDocument&, const std::string&, Filter") {
-    deserializeJson(doc, std::string("{}"),
-                    DeserializationOption::Filter(filter));
+  SECTION("deserializeJson(JsonDocument&, const std::string&, Filter)") {
+    deserializeJson(doc, std::string("{}"), Filter(filter));
   }
 
-  SECTION("deserializeJson(JsonDocument&, std::istream&, Filter") {
+  SECTION("deserializeJson(JsonDocument&, std::istream&, Filter)") {
     std::stringstream s("{}");
-    deserializeJson(doc, s, DeserializationOption::Filter(filter));
+    deserializeJson(doc, s, Filter(filter));
+  }
+
+#ifdef HAS_VARIABLE_LENGTH_ARRAY
+  SECTION("deserializeJson(JsonDocument&, char[n], Filter)") {
+    int i = 4;
+    char vla[i];
+    strcpy(vla, "{}");
+    deserializeJson(doc, vla, Filter(filter));
+  }
+#endif
+
+  SECTION("deserializeJson(JsonDocument&, const char*, Filter, NestingLimit)") {
+    deserializeJson(doc, "{}", Filter(filter), NestingLimit(5));
+  }
+
+  SECTION(
+      "deserializeJson(JsonDocument&, const char*, size_t, Filter, "
+      "NestingLimit)") {
+    deserializeJson(doc, "{}", 2, Filter(filter), NestingLimit(5));
   }
 }
