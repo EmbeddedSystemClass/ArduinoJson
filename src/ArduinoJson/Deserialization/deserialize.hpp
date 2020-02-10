@@ -29,24 +29,19 @@ template <template <typename, typename> class TDeserializer, typename TString>
 typename enable_if<!is_array<TString>::value, DeserializationError>::type
 deserialize(JsonDocument &doc, const TString &input,
             NestingLimit nestingLimit) {
-  Reader<TString> reader(input);
-  doc.clear();
-  return makeDeserializer<TDeserializer>(
-             doc.memoryPool(), reader,
-             makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
-      .parse(doc.data());
+  return deserialize<TDeserializer>(doc, input, nestingLimit, AllowAllFilter());
 }
-
-// TODO: deduplicate
+//
 // deserialize(JsonDocument&, const std::string&, Filter);
 // deserialize(JsonDocument&, const String&, Filter);
 // deserialize(JsonDocument&, char*, Filter);
 // deserialize(JsonDocument&, const char*, Filter);
 // deserialize(JsonDocument&, const __FlashStringHelper*, Filter);
-template <template <typename, typename> class TDeserializer, typename TString>
+template <template <typename, typename> class TDeserializer, typename TString,
+          typename TFilter>
 typename enable_if<!is_array<TString>::value, DeserializationError>::type
 deserialize(JsonDocument &doc, const TString &input, NestingLimit nestingLimit,
-            Filter filter) {
+            TFilter filter) {
   Reader<TString> reader(input);
   doc.clear();
   return makeDeserializer<TDeserializer>(
@@ -61,22 +56,18 @@ deserialize(JsonDocument &doc, const TString &input, NestingLimit nestingLimit,
 template <template <typename, typename> class TDeserializer, typename TChar>
 DeserializationError deserialize(JsonDocument &doc, TChar *input,
                                  size_t inputSize, NestingLimit nestingLimit) {
-  BoundedReader<TChar *> reader(input, inputSize);
-  doc.clear();
-  return makeDeserializer<TDeserializer>(
-             doc.memoryPool(), reader,
-             makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
-      .parse(doc.data());
+  return deserialize<TDeserializer>(doc, input, inputSize, nestingLimit,
+                                    AllowAllFilter());
 }
 //
-// TODO: deduplicate
 // deserialize(JsonDocument&, char*, size_t, Filter);
 // deserialize(JsonDocument&, const char*, size_t, Filter);
 // deserialize(JsonDocument&, const __FlashStringHelper*, size_t, Filter);
-template <template <typename, typename> class TDeserializer, typename TChar>
+template <template <typename, typename> class TDeserializer, typename TChar,
+          typename TFilter>
 DeserializationError deserialize(JsonDocument &doc, TChar *input,
                                  size_t inputSize, NestingLimit nestingLimit,
-                                 Filter filter) {
+                                 TFilter filter) {
   BoundedReader<TChar *> reader(input, inputSize);
   doc.clear();
   return makeDeserializer<TDeserializer>(
@@ -90,20 +81,15 @@ DeserializationError deserialize(JsonDocument &doc, TChar *input,
 template <template <typename, typename> class TDeserializer, typename TStream>
 DeserializationError deserialize(JsonDocument &doc, TStream &input,
                                  NestingLimit nestingLimit) {
-  Reader<TStream> reader(input);
-  doc.clear();
-  return makeDeserializer<TDeserializer>(
-             doc.memoryPool(), reader,
-             makeStringStorage(doc.memoryPool(), input), nestingLimit.value)
-      .parse(doc.data());
+  return deserialize<TDeserializer>(doc, input, nestingLimit, AllowAllFilter());
 }
-
-// TODO: deduplicate
-// deserialize(JsonDocument&, std::istream&);
-// deserialize(JsonDocument&, Stream&);
-template <template <typename, typename> class TDeserializer, typename TStream>
+//
+// deserialize(JsonDocument&, std::istream&, Filter);
+// deserialize(JsonDocument&, Stream&, Filter);
+template <template <typename, typename> class TDeserializer, typename TStream,
+          typename TFilter>
 DeserializationError deserialize(JsonDocument &doc, TStream &input,
-                                 NestingLimit nestingLimit, Filter filter) {
+                                 NestingLimit nestingLimit, TFilter filter) {
   Reader<TStream> reader(input);
   doc.clear();
   return makeDeserializer<TDeserializer>(

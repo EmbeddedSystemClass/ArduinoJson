@@ -26,7 +26,9 @@ class MsgPackDeserializer {
         _stringStorage(stringStorage),
         _nestingLimit(nestingLimit) {}
 
-  DeserializationError parse(VariantData &variant) {
+  // TODO: add support for filter
+  DeserializationError parse(VariantData &variant,
+                             AllowAllFilter = AllowAllFilter()) {
     uint8_t code;
     if (!readByte(code)) return DeserializationError::IncompleteInput;
 

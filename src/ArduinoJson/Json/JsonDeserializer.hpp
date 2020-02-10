@@ -29,10 +29,6 @@ class JsonDeserializer {
         _nestingLimit(nestingLimit),
         _loaded(false) {}
 
-  DeserializationError parse(VariantData &variant) {
-    return parse(variant, AllowAllFilter());
-  }
-
   template <typename TFilter>
   DeserializationError parse(VariantData &variant, TFilter filter) {
     DeserializationError err = parseVariant(variant, filter);
