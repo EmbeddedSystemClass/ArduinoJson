@@ -368,4 +368,13 @@ TEST_CASE("Overloads") {
     std::stringstream s("{}");
     deserializeJson(doc, s, Filter(filter), NestingLimit(5));
   }
+
+#ifdef HAS_VARIABLE_LENGTH_ARRAY
+  SECTION("char[n], Filter, NestingLimit") {
+    int i = 4;
+    char vla[i];
+    strcpy(vla, "{}");
+    deserializeJson(doc, vla, Filter(filter), NestingLimit(5));
+  }
+#endif
 }

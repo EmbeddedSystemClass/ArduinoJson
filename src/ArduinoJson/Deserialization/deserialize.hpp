@@ -20,23 +20,26 @@ TDeserializer<TReader, TWriter> makeDeserializer(MemoryPool &pool,
   return TDeserializer<TReader, TWriter>(pool, reader, writer, nestingLimit);
 }
 
-// deserialize(JsonDocument&, const std::string&);
-// deserialize(JsonDocument&, const String&);
-// deserialize(JsonDocument&, char*);
-// deserialize(JsonDocument&, const char*);
-// deserialize(JsonDocument&, const __FlashStringHelper*);
+// deserialize(JsonDocument&, const std::string&, NestingLimit);
+// deserialize(JsonDocument&, const String&, NestingLimit);
 template <template <typename, typename> class TDeserializer, typename TString>
 typename enable_if<!is_array<TString>::value, DeserializationError>::type
 deserialize(JsonDocument &doc, const TString &input,
-            NestingLimit nestingLimit) {
+            NestingLimit nestingLimit = NestingLimit()) {
   return deserialize<TDeserializer>(doc, input, nestingLimit, AllowAllFilter());
+}
+//
+// deserialize(JsonDocument&, const std::string&, Filter, NestingLimit);
+// deserialize(JsonDocument&, const String&, Filter, NestingLimit);
+template <template <typename, typename> class TDeserializer, typename TString>
+typename enable_if<!is_array<TString>::value, DeserializationError>::type
+deserialize(JsonDocument &doc, const TString &input, Filter filter,
+            NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<TDeserializer>(doc, input, nestingLimit, filter);
 }
 //
 // deserialize(JsonDocument&, const std::string&, Filter);
 // deserialize(JsonDocument&, const String&, Filter);
-// deserialize(JsonDocument&, char*, Filter);
-// deserialize(JsonDocument&, const char*, Filter);
-// deserialize(JsonDocument&, const __FlashStringHelper*, Filter);
 template <template <typename, typename> class TDeserializer, typename TString,
           typename TFilter>
 typename enable_if<!is_array<TString>::value, DeserializationError>::type
@@ -50,12 +53,13 @@ deserialize(JsonDocument &doc, const TString &input, NestingLimit nestingLimit,
       .parse(doc.data(), filter);
 }
 
-// deserialize(JsonDocument&, char*, size_t);
-// deserialize(JsonDocument&, const char*, size_t);
-// deserialize(JsonDocument&, const __FlashStringHelper*, size_t);
+// deserialize(JsonDocument&, char*, size_t, NestingLimit);
+// deserialize(JsonDocument&, const char*, size_t, NestingLimit);
+// deserialize(JsonDocument&, const __FlashStringHelper*, size_t, NestingLimit);
 template <template <typename, typename> class TDeserializer, typename TChar>
 DeserializationError deserialize(JsonDocument &doc, TChar *input,
-                                 size_t inputSize, NestingLimit nestingLimit) {
+                                 size_t inputSize,
+                                 NestingLimit nestingLimit = NestingLimit()) {
   return deserialize<TDeserializer>(doc, input, inputSize, nestingLimit,
                                     AllowAllFilter());
 }
@@ -63,6 +67,17 @@ DeserializationError deserialize(JsonDocument &doc, TChar *input,
 // deserialize(JsonDocument&, char*, size_t, Filter);
 // deserialize(JsonDocument&, const char*, size_t, Filter);
 // deserialize(JsonDocument&, const __FlashStringHelper*, size_t, Filter);
+template <template <typename, typename> class TDeserializer, typename TChar>
+DeserializationError deserialize(JsonDocument &doc, TChar *input,
+                                 size_t inputSize, Filter filter,
+                                 NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<TDeserializer>(doc, input, inputSize, nestingLimit,
+                                    filter);
+}
+//
+// deserialize(JsonDocument&, char*, size_t, NestingLimit, Filter);
+// deserialize(JsonDocument&, const char*, size_t, NestingLimit, Filter);
+// deserialize(JsonDocument&, const __FlashStringHelper*, size_t, NL, Filter);
 template <template <typename, typename> class TDeserializer, typename TChar,
           typename TFilter>
 DeserializationError deserialize(JsonDocument &doc, TChar *input,
@@ -76,16 +91,24 @@ DeserializationError deserialize(JsonDocument &doc, TChar *input,
       .parse(doc.data(), filter);
 }
 
-// deserialize(JsonDocument&, std::istream&);
-// deserialize(JsonDocument&, Stream&);
+// deserialize(JsonDocument&, std::istream&, NestingLimit);
+// deserialize(JsonDocument&, Stream&, NestingLimit);
 template <template <typename, typename> class TDeserializer, typename TStream>
 DeserializationError deserialize(JsonDocument &doc, TStream &input,
-                                 NestingLimit nestingLimit) {
+                                 NestingLimit nestingLimit = NestingLimit()) {
   return deserialize<TDeserializer>(doc, input, nestingLimit, AllowAllFilter());
 }
+// deserialize(JsonDocument&, std::istream&, Filter, NestingLimit);
+// deserialize(JsonDocument&, Stream&, Filter, NestingLimit);
+template <template <typename, typename> class TDeserializer, typename TStream>
+DeserializationError deserialize(JsonDocument &doc, TStream &input,
+                                 Filter filter,
+                                 NestingLimit nestingLimit = NestingLimit()) {
+  return deserialize<TDeserializer>(doc, input, nestingLimit, filter);
+}
 //
-// deserialize(JsonDocument&, std::istream&, Filter);
-// deserialize(JsonDocument&, Stream&, Filter);
+// deserialize(JsonDocument&, std::istream&, NestingLimit, Filter);
+// deserialize(JsonDocument&, Stream&, NestingLimit, Filter);
 template <template <typename, typename> class TDeserializer, typename TStream,
           typename TFilter>
 DeserializationError deserialize(JsonDocument &doc, TStream &input,
