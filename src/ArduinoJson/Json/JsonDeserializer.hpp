@@ -27,8 +27,9 @@ class JsonDeserializer {
         _reader(reader),
         _stringStorage(stringStorage),
         _nestingLimit(nestingLimit),
-        _loaded(false),
+        _loaded(false)
 #ifdef ARDUINOJSON_DEBUG
+        ,
         _ended(false)
 #endif
   {
