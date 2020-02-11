@@ -27,7 +27,12 @@ class JsonDeserializer {
         _reader(reader),
         _stringStorage(stringStorage),
         _nestingLimit(nestingLimit),
-        _loaded(false) {}
+        _loaded(false),
+#ifdef ARDUINOJSON_DEBUG
+        _ended(false)
+#endif
+  {
+  }
 
   template <typename TFilter>
   DeserializationError parse(VariantData &variant, TFilter filter) {
@@ -46,7 +51,11 @@ class JsonDeserializer {
 
   char current() {
     if (!_loaded) {
+      ARDUINOJSON_ASSERT(!_ended);
       int c = _reader.read();
+#ifdef ARDUINOJSON_DEBUG
+      if (c <= 0) _ended = true;
+#endif
       _current = static_cast<char>(c > 0 ? c : 0);
       _loaded = true;
     }
@@ -448,7 +457,7 @@ class JsonDeserializer {
 
   DeserializationError skipNumericValue() {
     char c = current();
-    while (c != '}' && c != ',' && c != ']' && c != ':') {
+    while (c && c != '}' && c != ',' && c != ']' && c != ':') {
       move();
       c = current();
     }
@@ -554,6 +563,9 @@ class JsonDeserializer {
   uint8_t _nestingLimit;
   char _current;
   bool _loaded;
+#ifdef ARDUINOJSON_DEBUG
+  bool _ended;
+#endif
   VariantConstRef _filter;
 };
 
