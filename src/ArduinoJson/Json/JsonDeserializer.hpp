@@ -149,9 +149,9 @@ class JsonDeserializer {
         _nestingLimit++;
         if (err) return err;
       } else {
-        // _nestingLimit--;  TODO
+        _nestingLimit--;
         err = skipVariant();
-        // _nestingLimit++;  TODO
+        _nestingLimit++;
         if (err) return err;
       }
 
@@ -173,10 +173,10 @@ class JsonDeserializer {
 
     // Read each value
     for (;;) {
-      // 1 - Parse value
-      // nestingLimit--; // TODO
+      // 1 - Skip value
+      _nestingLimit--;
       DeserializationError err = skipVariant();
-      // _nestingLimit++; // TODO
+      _nestingLimit++;
       if (err) return err;
 
       // 2 - Skip spaces
@@ -237,10 +237,10 @@ class JsonDeserializer {
         if (err) return err;
       } else {
         _stringStorage.reclaim(key);
-        // _nestingLimit--; TODO
+        _nestingLimit--;
         err = skipVariant();
-        // _nestingLimit++; TODO
-        // if (err) return err; TODO
+        _nestingLimit++;
+        if (err) return err;
       }
 
       // Skip spaces
@@ -258,8 +258,7 @@ class JsonDeserializer {
   }
 
   DeserializationError skipObject() {
-    // TODO
-    // if (_nestingLimit == 0) return DeserializationError::TooDeep;
+    if (_nestingLimit == 0) return DeserializationError::TooDeep;
 
     // Check opening brace
     if (!eat('{')) return DeserializationError::InvalidInput;
@@ -283,9 +282,9 @@ class JsonDeserializer {
       if (!eat(':')) return DeserializationError::InvalidInput;
 
       // Skip value
-      // _nestingLimit--; TODO
+      _nestingLimit--;
       err = skipVariant();
-      // _nestingLimit++;
+      _nestingLimit++;
       if (err) return err;
 
       // Skip spaces
